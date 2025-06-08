@@ -127,10 +127,8 @@ namespace AgentsManager
             Console.Clear();
             Console.WriteLine("--- Update Agent ---");
 
-            // שימוש בפונקציית העזר לקבלת ID בטוח
             int id = GetIntegerFromUser("Enter Agent ID to update: ");
 
-            // קודם כל, נוודא שהסוכן קיים
             var agent = dal.GetAgentById(id);
             if (agent == null)
             {
@@ -141,7 +139,6 @@ namespace AgentsManager
 
             Console.WriteLine("Enter new information. Press ENTER to keep current value.");
 
-            // עדכון CodeName, רק אם הקלט לא ריק
             Console.Write($"Code Name ({agent.CodeName}): ");
             string newCodeName = Console.ReadLine();
             if (!string.IsNullOrWhiteSpace(newCodeName))
@@ -149,7 +146,6 @@ namespace AgentsManager
                 agent.CodeName = newCodeName;
             }
 
-            // עדכון RealName, רק אם הקלט לא ריק
             Console.Write($"Real Name ({agent.RealName}): ");
             string newRealName = Console.ReadLine();
             if (!string.IsNullOrWhiteSpace(newRealName))
@@ -157,7 +153,6 @@ namespace AgentsManager
                 agent.RealName = newRealName;
             }
 
-            // עדכון Location, רק אם הקלט לא ריק
             Console.Write($"Location ({agent.Location}): ");
             string newLocation = Console.ReadLine();
             if (!string.IsNullOrWhiteSpace(newLocation))
@@ -165,7 +160,6 @@ namespace AgentsManager
                 agent.Location = newLocation;
             }
 
-            // עדכון Status, תוך שימוש בפונקציה שבודקת תקינות
             Console.WriteLine($"Current Status: {agent.Status}");
             string newStatus = GetValidStatusFromUser("New Status (Active, Injured, Missing, Retired) or press ENTER: ");
             if (!string.IsNullOrWhiteSpace(newStatus))
@@ -173,7 +167,6 @@ namespace AgentsManager
                 agent.Status = newStatus;
             }
 
-            // עדכון MissionsCompleted, עם בדיקת תקינות מספר
             Console.Write($"Missions Completed ({agent.MissionsCompleted}): ");
             string missionsInput = Console.ReadLine();
             if (int.TryParse(missionsInput, out int newMissionsCompleted))
@@ -181,7 +174,6 @@ namespace AgentsManager
                 agent.MissionsCompleted = newMissionsCompleted;
             }
 
-            // קריאה ל-DAL ובדיקת התשובה - האם העדכון באמת הצליח?
             if (dal.UpdateAgent(agent))
             {
                 Console.WriteLine("\nAgent updated successfully in the database.");
@@ -226,7 +218,6 @@ namespace AgentsManager
 
                 if (validStatuses.Contains(input, StringComparer.OrdinalIgnoreCase))
                 {
-                    // מחזירים את הערך כמו שהוא כתוב ברשימה המקורית (עם אות ראשונה גדולה)
                     return validStatuses.First(s => s.Equals(input, StringComparison.OrdinalIgnoreCase));
                 }
 
