@@ -33,7 +33,7 @@ namespace AgentsManager
                                 reader.GetString("realName"),
                                 reader.GetString("location"),
                                 reader.GetString("status"),
-                                reader.GetInt32("missionsCompleted")
+                                reader.GetInt32("missionCompleted")
                             ));
                         }
                     }
@@ -69,7 +69,7 @@ namespace AgentsManager
                                     reader.GetString("realName"),
                                     reader.GetString("location"),
                                     reader.GetString("status"),
-                                    reader.GetInt32("missionsCompleted")
+                                    reader.GetInt32("missionCompleted")
                                 );
                             }
                         }
@@ -92,8 +92,8 @@ namespace AgentsManager
                 {
                     conn.Open();
                     var query = @"INSERT INTO agent 
-                        (codeName, realName, location, status, missionsCompleted)
-                        VALUES (@codeName, @realName, @location, @status, @missionsCompleted)";
+                        (codeName, realName, location, status, missionCompleted)
+                        VALUES (@codeName, @realName, @location, @status, @missionCompleted)";
 
                     using (var cmd = new MySqlCommand(query, conn))
                     {
@@ -101,7 +101,7 @@ namespace AgentsManager
                         cmd.Parameters.AddWithValue("@realName", agent.RealName);
                         cmd.Parameters.AddWithValue("@location", agent.Location);
                         cmd.Parameters.AddWithValue("@status", agent.Status);
-                        cmd.Parameters.AddWithValue("@missionsCompleted", agent.MissionsCompleted);
+                        cmd.Parameters.AddWithValue("@missionCompleted", agent.MissionsCompleted);
                         cmd.ExecuteNonQuery();
                     }
                 }
@@ -112,17 +112,16 @@ namespace AgentsManager
             }
         }
 
-        public void UpdateAgent(Agent agent)
+        public bool UpdateAgent(Agent agent)
         {
             using (var conn = new MySqlConnection(_connStr))
             {
                 try
                 {
                     conn.Open();
-                    var query = @"UPDATE agent 
-                                  SET codeName = @codeName, realName = @realName, location = @location, 
-                                      status = @status, missionsCompleted = @missionsCompleted
-                                  WHERE id = @id";
+                    var query = @"UPDATE agent  SET codeName = @codeName, realName = @realName, location = @location, 
+                              status = @status, missionCompleted = @missionCompleted
+                              WHERE id = @id";
 
                     using (var cmd = new MySqlCommand(query, conn))
                     {
@@ -130,23 +129,21 @@ namespace AgentsManager
                         cmd.Parameters.AddWithValue("@realName", agent.RealName);
                         cmd.Parameters.AddWithValue("@location", agent.Location);
                         cmd.Parameters.AddWithValue("@status", agent.Status);
-                        cmd.Parameters.AddWithValue("@missionsCompleted", agent.MissionsCompleted);
+                        cmd.Parameters.AddWithValue("@missionCompleted", agent.MissionsCompleted);
                         cmd.Parameters.AddWithValue("@id", agent.Id);
 
                         int rowsAffected = cmd.ExecuteNonQuery();
-                        if (rowsAffected == 0)
-                        {
-                            Console.WriteLine($"No agent with ID {agent.Id} found to update.");
-                        }
+
+                        return rowsAffected > 0;
                     }
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine("Error updating agent: " + e.Message);
+                    return false;
                 }
             }
         }
-
         public void DeleteAgent(int id)
         {
             using (var conn = new MySqlConnection(_connStr))

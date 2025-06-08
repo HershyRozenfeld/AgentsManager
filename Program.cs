@@ -77,7 +77,17 @@ namespace AgentsManager
             Console.WriteLine("Agent added successfully. Press any key to continue...");
             Console.ReadKey();
         }
-
+        static int GetIntegerFromUser(string prompt)
+        {
+            int number;
+            Console.Write(prompt);
+            while (!int.TryParse(Console.ReadLine(), out number))
+            {
+                Console.WriteLine("Invalid input. Must enter an integer. Try again.");
+                Console.Write(prompt);
+            }
+            return number;
+        }
         static void ShowAllAgents(AgentDAL dal)
         {
             Console.Clear();
@@ -96,7 +106,7 @@ namespace AgentsManager
         {
             Console.Clear();
             Console.Write("Enter Agent ID: ");
-            int id = int.Parse(Console.ReadLine());
+            int id = GetIntegerFromUser("Enter Agent ID: ");
 
             var agent = dal.GetAgentById(id);
             if (agent != null)
@@ -116,33 +126,72 @@ namespace AgentsManager
         {
             Console.Clear();
             Console.WriteLine("--- Update Agent ---");
-            Console.Write("Enter Agent ID: ");
-            int id = int.Parse(Console.ReadLine());
 
+            // שימוש בפונקציית העזר לקבלת ID בטוח
+            int id = GetIntegerFromUser("Enter Agent ID to update: ");
+
+            // קודם כל, נוודא שהסוכן קיים
             var agent = dal.GetAgentById(id);
             if (agent == null)
             {
-                Console.WriteLine("Agent not found.");
+                Console.WriteLine("Agent not found. No one to update.");
                 Console.ReadKey();
                 return;
             }
 
+            Console.WriteLine("Enter new information. Press ENTER to keep current value.");
+
+            // עדכון CodeName, רק אם הקלט לא ריק
             Console.Write($"Code Name ({agent.CodeName}): ");
-            agent.CodeName = Console.ReadLine();
+            string newCodeName = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(newCodeName))
+            {
+                agent.CodeName = newCodeName;
+            }
 
+            // עדכון RealName, רק אם הקלט לא ריק
             Console.Write($"Real Name ({agent.RealName}): ");
-            agent.RealName = Console.ReadLine();
+            string newRealName = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(newRealName))
+            {
+                agent.RealName = newRealName;
+            }
 
+            // עדכון Location, רק אם הקלט לא ריק
             Console.Write($"Location ({agent.Location}): ");
-            agent.Location = Console.ReadLine();
+            string newLocation = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(newLocation))
+            {
+                agent.Location = newLocation;
+            }
 
-            agent.Status = GetValidStatusFromUser($"Status ({agent.Status}) (Active, Injured, Missing, Retired): ");
+            // עדכון Status, תוך שימוש בפונקציה שבודקת תקינות
+            Console.WriteLine($"Current Status: {agent.Status}");
+            string newStatus = GetValidStatusFromUser("New Status (Active, Injured, Missing, Retired) or press ENTER: ");
+            if (!string.IsNullOrWhiteSpace(newStatus))
+            {
+                agent.Status = newStatus;
+            }
 
+            // עדכון MissionsCompleted, עם בדיקת תקינות מספר
             Console.Write($"Missions Completed ({agent.MissionsCompleted}): ");
-            agent.MissionsCompleted = int.Parse(Console.ReadLine());
+            string missionsInput = Console.ReadLine();
+            if (int.TryParse(missionsInput, out int newMissionsCompleted))
+            {
+                agent.MissionsCompleted = newMissionsCompleted;
+            }
 
-            dal.UpdateAgent(agent);
-            Console.WriteLine("Agent updated successfully.");
+            // קריאה ל-DAL ובדיקת התשובה - האם העדכון באמת הצליח?
+            if (dal.UpdateAgent(agent))
+            {
+                Console.WriteLine("\nAgent updated successfully in the database.");
+            }
+            else
+            {
+                Console.WriteLine("\nFailed to update agent. Check for database errors.");
+            }
+
+            Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
         }
 
@@ -150,7 +199,7 @@ namespace AgentsManager
         {
             Console.Clear();
             Console.Write("Enter Agent ID to delete: ");
-            int id = int.Parse(Console.ReadLine());
+            int id = GetIntegerFromUser("Enter Agent ID: ");
 
             dal.DeleteAgent(id);
             Console.WriteLine("Agent deleted successfully.");
